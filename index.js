@@ -9,7 +9,6 @@ if (d){
 
 window.addEventListener('load', function() {
   'use strict';
-  var isStarted = false;
   var input = document.querySelector('.count');
   var btnGenerate = document.querySelector('.generateField');
   var btnStartNewGame = document.querySelector('.startNewGame');
@@ -78,13 +77,11 @@ window.addEventListener('load', function() {
     if (getWinner() === 'x') {
       winnerMessage.innerHTML = 'x-wins';
       field.removeEventListener('click', clickOnFieldListener);
-      isStarted = false;
       return;
     }
     if (getWinner() === 'o') {
       winnerMessage.innerHTML = 'o-wins';
       field.removeEventListener('click', clickOnFieldListener);
-      isStarted = false;
       return;
     }
   }
