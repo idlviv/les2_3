@@ -1,6 +1,5 @@
 var state = {
   size : [],
-  winMes : [],
   items : []
 };
 var d = localStorage.getItem('game');
@@ -9,8 +8,6 @@ if (d){
 }
 
 window.addEventListener('load', function() {
-
-  //Ваш код будет здесь
   'use strict';
   var isStarted = false;
   var input = document.querySelector('.count');
@@ -25,10 +22,8 @@ window.addEventListener('load', function() {
   var field = document.querySelector('.field');
   var i;
   var j;
-  var nextMove;
   var cells;
   
-
   function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
   }
@@ -41,14 +36,13 @@ window.addEventListener('load', function() {
     startGame.style.display = 'inline-block';
     mainGame.style.display = 'none';
     localStorage.clear('game');
-    state.winMes.length = 0;
     state.size.length = 0;
     state.items.length = 0;
   }
 
-
-
-  function generateField(x) {
+  function fieldGeneration(x) {
+    state.size.length = 0;
+    state.size.push(+x);
     winnerMessage.innerHTML = '';
     field = document.querySelector('.field');
     startGame.style.display = 'none';
@@ -63,14 +57,13 @@ window.addEventListener('load', function() {
         row.appendChild(cell);
       }
     }
-    nextMove = 'x';
-    cells = document.querySelectorAll('.cell');
-    if (state.winMes[0]) {
-      console.log(state.winMes[0]);
-      winnerMessage.innerHTML = state.winMes[0];
-    }
-    for (i=0; i < state.items.length; i++){
+  }
 
+  function updateFromState () {
+    var nextMove = 'x';
+    console.log(nextMove);
+    cells = document.querySelectorAll('.cell');
+    for (i=0; i < state.items.length; i++){
       if (nextMove === 'x') {
         cells[state.items[i]].classList.add('x');
         nextMove = 'o';
@@ -79,71 +72,65 @@ window.addEventListener('load', function() {
         nextMove = 'x';
       }
     }
-
-
-
-    btnStartNewGame.addEventListener('click', function startNewGameListener() {
-      btnStartNewGame.removeEventListener('click', startNewGameListener);
-      clearData();
-    });
-    if (!isStarted){
-    field.addEventListener('click', clickOnFieldListener);
+    if (state.items.length === cells.length) {
+      field.removeEventListener('click', clickOnFieldListener);
     }
-
-
-
-    state.size.push(+x);
-    function clickOnFieldListener (event) {
-      isStarted = true;
-      var clickedCell = event.target;
-
-
-      if (clickedCell.classList.contains('x') || clickedCell.classList.contains('o')){
-        return;
-      }
-      if (clickedCell.classList === field || clickedCell.classList === row){
-        return;
-      }
-
-      if (nextMove === 'x') {
-        clickedCell.classList.add('x');
-        nextMove = 'o';
-      } else {
-        clickedCell.classList.add('o');
-        nextMove = 'x';
-      }
-
-
-
-      var index;
-      console.log (cells.length);
-      index = Array.prototype.indexOf.call(cells, clickedCell);
-        state.items.push(index);
-
-
-
-      if (getWinner() === 'x'){
-        winnerMessage.innerHTML = 'x-wins';
-        field.removeEventListener('click', clickOnFieldListener);
-        isStarted = false;
-        state.winMes.push(winnerMessage.innerHTML);
-      }
-
-      if (getWinner() === 'o') {
-        winnerMessage.innerHTML = 'o-wins';
-        field.removeEventListener('click', clickOnFieldListener);
-        isStarted = false;
-        state.winMes.push(winnerMessage.innerHTML);
-      }
-
-
-      console.log (state.items);
-      localStorage.setItem('game', JSON.stringify(state));
-      console.log (localStorage.getItem('game'));
-
+    if (getWinner() === 'x') {
+      winnerMessage.innerHTML = 'x-wins';
+      field.removeEventListener('click', clickOnFieldListener);
+      isStarted = false;
+      return;
+    }
+    if (getWinner() === 'o') {
+      winnerMessage.innerHTML = 'o-wins';
+      field.removeEventListener('click', clickOnFieldListener);
+      isStarted = false;
+      return;
     }
   }
 
+  function clickOnFieldListener (event) {
+    var clickedCell = event.target;
+    var index;
+    var nextMove;
+    cells = document.querySelectorAll('.cell');
+    if (document.querySelectorAll('.cell.x').length <= document.querySelectorAll('.cell.o').length) {
+      nextMove = 'x';
+    } else {
+      nextMove = 'o';
+    }
+    index = Array.prototype.indexOf.call(cells, clickedCell);
+    if (index < 0) {
+      return;
+    }
+    if (clickedCell.classList.contains('x') || clickedCell.classList.contains('o')){
+      return;
+    }
+    if (clickedCell.classList === field || clickedCell.classList === row){
+      return;
+    }
+    if (nextMove === 'x') {
+      clickedCell.classList.add('x');
+    } else {
+      clickedCell.classList.add('o');
+    }
+    state.items.push(index);
+    localStorage.setItem('game', JSON.stringify(state));
+    updateFromState();
+  }
+
+  function starting(x) {
+
+     fieldGeneration(x);
+
+     updateFromState ();
+
+    btnStartNewGame.addEventListener('click', function startNewGameListener() {
+      field.addEventListener('click', clickOnFieldListener);
+      btnStartNewGame.removeEventListener('click', startNewGameListener);
+      clearData();
+    });
+  }
 
   function setBtnFieldSizeListener(event) {
     if (event.keyCode === 13) {
@@ -151,20 +138,20 @@ window.addEventListener('load', function() {
     }
   }
 
-
   function setFieldSizeListener() {
     errorMessage.innerHTML = '';
     if (input.value < 16 && input.value >= 5 && isNumber(input.value)) {
-      // btnGenerate.removeEventListener('click', generateFieldListener);
-      // input.removeEventListener('keydown', generateEnterListener);
-      generateField(parseInt(input.value).toFixed(0));
+      starting(parseInt(input.value).toFixed(0));
     } else {
       errorMessage.innerHTML = 'Число маэ бути від 5 до 15';
     }
   }
-    input.addEventListener('keydown', setBtnFieldSizeListener);
-    btnGenerate.addEventListener('click', setFieldSizeListener);
-    if (d){
-      generateField(state.size[0]);
-    }
+
+  input.addEventListener('keydown', setBtnFieldSizeListener);
+  btnGenerate.addEventListener('click', setFieldSizeListener);
+  field.addEventListener('click', clickOnFieldListener);
+
+  if (d){
+    starting(state.size[0]);
+  }
 });
