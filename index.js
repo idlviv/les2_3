@@ -1,13 +1,13 @@
 var state = {
-  size : [],
-  items : []
+  'size': [],
+  'items': []
 };
 var d = localStorage.getItem('game');
-if (d){
+if (d) {
   state = JSON.parse(localStorage.getItem('game'));
 }
 
-window.addEventListener('load', function() {
+window.addEventListener('load', function windowLoader() {
   'use strict';
   var input = document.querySelector('.count');
   var btnGenerate = document.querySelector('.generateField');
@@ -22,16 +22,16 @@ window.addEventListener('load', function() {
   var i;
   var j;
   var cells;
-  
+
   function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
   }
 
-  function clearData (){
+  function clearData() {
     field = document.querySelector('.field');
-      while (field.lastChild) {
-        field.removeChild(field.lastChild);
-      }
+    while (field.lastChild) {
+      field.removeChild(field.lastChild);
+    }
     startGame.style.display = 'inline-block';
     mainGame.style.display = 'none';
     localStorage.clear('game');
@@ -58,11 +58,10 @@ window.addEventListener('load', function() {
     }
   }
 
-  function updateFromState () {
+  function updateFromState() {
     var nextMove = 'x';
-    console.log(nextMove);
     cells = document.querySelectorAll('.cell');
-    for (i=0; i < state.items.length; i++){
+    for (i = 0; i < state.items.length; i++) {
       if (nextMove === 'x') {
         cells[state.items[i]].classList.add('x');
         nextMove = 'o';
@@ -82,11 +81,10 @@ window.addEventListener('load', function() {
     if (getWinner() === 'o') {
       winnerMessage.innerHTML = 'o-wins';
       field.removeEventListener('click', clickOnFieldListener);
-      return;
     }
   }
 
-  function clickOnFieldListener (event) {
+  function clickOnFieldListener(event) {
     var clickedCell = event.target;
     var index;
     var nextMove;
@@ -100,10 +98,10 @@ window.addEventListener('load', function() {
     if (index < 0) {
       return;
     }
-    if (clickedCell.classList.contains('x') || clickedCell.classList.contains('o')){
+    if (clickedCell.classList.contains('x') || clickedCell.classList.contains('o')) {
       return;
     }
-    if (clickedCell.classList === field || clickedCell.classList === row){
+    if (clickedCell.classList === field || clickedCell.classList === row) {
       return;
     }
     if (nextMove === 'x') {
@@ -117,10 +115,9 @@ window.addEventListener('load', function() {
   }
 
   function starting(x) {
+    fieldGeneration(x);
 
-     fieldGeneration(x);
-
-     updateFromState ();
+    updateFromState();
 
     btnStartNewGame.addEventListener('click', function startNewGameListener() {
       field.addEventListener('click', clickOnFieldListener);
@@ -129,26 +126,25 @@ window.addEventListener('load', function() {
     });
   }
 
-  function setBtnFieldSizeListener(event) {
-    if (event.keyCode === 13) {
-      setFieldSizeListener();
-    }
-  }
-
   function setFieldSizeListener() {
     errorMessage.innerHTML = '';
     if (input.value < 16 && input.value >= 5 && isNumber(input.value)) {
-      starting(parseInt(input.value).toFixed(0));
+      starting(parseInt(input.value, 10).toFixed(0));
     } else {
       errorMessage.innerHTML = 'Число маэ бути від 5 до 15';
     }
   }
 
+  function setBtnFieldSizeListener(event) {
+    if (event.keyCode === 13) {
+      setFieldSizeListener();
+    }
+  }
   input.addEventListener('keydown', setBtnFieldSizeListener);
   btnGenerate.addEventListener('click', setFieldSizeListener);
   field.addEventListener('click', clickOnFieldListener);
 
-  if (d){
+  if (d) {
     starting(state.size[0]);
   }
 });
